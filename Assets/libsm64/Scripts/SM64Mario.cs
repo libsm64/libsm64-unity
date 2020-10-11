@@ -1,0 +1,102 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.IO;
+using UnityEngine;
+
+public class SM64Mario : MonoBehaviour
+{
+    Vector3 lastMarioPos = Vector3.zero;
+    Vector3[] positionBuffer;
+    Vector3[] normalBuffer;
+    Vector3[] colorBuffer;
+    Mesh mesh1;
+
+    void Awake()
+    {
+        LibSM64Interop.InitWithROM(File.ReadAllBytes(Application.dataPath + "/../baserom.us.z64"));
+
+        var surfaces = new List<LibSM64Interop.SM64Surface>();
+        var meshColliders = FindObjectsOfType<MeshCollider>();
+
+        foreach( var mc in meshColliders )
+        {
+            var mesh = mc.sharedMesh;
+            var tris = mesh.GetTriangles(0);
+
+            var vertices = mesh.vertices.Select(x => {
+                return mc.transform.TransformPoint( x );
+            }).ToArray();
+
+            for( int i = 0; i < tris.Length; i += 3 )
+            {
+                surfaces.Add(new LibSM64Interop.SM64Surface {
+                    force = 0,
+                    type = 0,
+                    v0x = (short)(LibSM64Interop.SCALE_FACTOR * -vertices[tris[i  ]].x),
+                    v0y = (short)(LibSM64Interop.SCALE_FACTOR * vertices[tris[i  ]].y),
+                    v0z = (short)(LibSM64Interop.SCALE_FACTOR * vertices[tris[i  ]].z),
+                    v1x = (short)(LibSM64Interop.SCALE_FACTOR * -vertices[tris[i+2]].x),
+                    v1y = (short)(LibSM64Interop.SCALE_FACTOR * vertices[tris[i+2]].y),
+                    v1z = (short)(LibSM64Interop.SCALE_FACTOR * vertices[tris[i+2]].z),
+                    v2x = (short)(LibSM64Interop.SCALE_FACTOR * -vertices[tris[i+1]].x),
+                    v2y = (short)(LibSM64Interop.SCALE_FACTOR * vertices[tris[i+1]].y),
+                    v2z = (short)(LibSM64Interop.SCALE_FACTOR * vertices[tris[i+1]].z)
+                });
+            }
+        }
+
+        var arr = surfaces.ToArray();
+
+        LibSM64Interop.LoadSurfaces( SM64TerrainType.TERRAIN_STONE, surfaces.ToArray() );
+        LibSM64Interop.MarioReset( new Vector3( -transform.position.x, transform.position.y, transform.position.z ) * LibSM64Interop.SCALE_FACTOR );
+
+        transform.parent = null;
+        transform.localScale = new Vector3( -1, 1, 1 ) / LibSM64Interop.SCALE_FACTOR;
+        transform.localPosition = Vector3.zero;
+
+        positionBuffer = new Vector3[3 * LibSM64Interop.MARIO_GEO_BUFFER_SIZE];
+        normalBuffer = new Vector3[3 * LibSM64Interop.MARIO_GEO_BUFFER_SIZE];
+        colorBuffer = new Vector3[3 * LibSM64Interop.MARIO_GEO_BUFFER_SIZE];
+
+        mesh1 = new Mesh();
+        mesh1.vertices = positionBuffer;
+        mesh1.triangles = Enumerable.Range(0, 3*1024).ToArray();
+        GetComponent<MeshFilter>().sharedMesh = mesh1;
+    }
+
+    void FixedUpdate() 
+    {
+        var cam = FindObjectOfType<Camera>();
+
+        var inputs = new LibSM64Interop.SM64MarioInputs();
+        var look = lastMarioPos - cam.transform.position;
+        look.y = 0;
+        look = look.normalized;
+
+        inputs.camLookX = -look.x;
+        inputs.camLookZ = look.z;
+        inputs.stickX = Input.GetAxis("Horizontal");
+        inputs.stickY = -Input.GetAxis("Vertical");
+        inputs.buttonA = Input.GetButton("Jump") ? (byte)1 : (byte)0;
+        inputs.buttonB = Input.GetButton("Kick") ? (byte)1 : (byte)0;
+        inputs.buttonZ = Input.GetButton("Z") ? (byte)1 : (byte)0;
+
+        var state = LibSM64Interop.MarioTick( inputs, positionBuffer, normalBuffer, colorBuffer );
+
+        mesh1.vertices = positionBuffer;
+        mesh1.normals = normalBuffer;
+        mesh1.colors = colorBuffer.Select( x => new Color( x.x, x.y, x.z, 1 )).ToArray(); // TODO only update color buffer when hash changes
+
+        mesh1.RecalculateBounds();
+        mesh1.RecalculateTangents();
+
+        lastMarioPos = new Vector3( -state.position[0], state.position[1], state.position[2] ) / LibSM64Interop.SCALE_FACTOR;
+
+        var targPos = lastMarioPos;
+        targPos.x = cam.transform.position.x;
+        targPos.y += 5;
+
+        cam.transform.position += (targPos - cam.transform.position) * .25f;
+        cam.transform.LookAt( lastMarioPos );
+    }
+}
