@@ -9,6 +9,7 @@ public class SM64Mario : MonoBehaviour
     Vector3[] positionBuffer;
     Vector3[] normalBuffer;
     Vector3[] colorBuffer;
+    Vector2[] uvBuffer;
     Mesh mesh1;
 
     void Awake()
@@ -54,9 +55,10 @@ public class SM64Mario : MonoBehaviour
         transform.localScale = new Vector3( -1, 1, 1 ) / LibSM64Interop.SCALE_FACTOR;
         transform.localPosition = Vector3.zero;
 
-        positionBuffer = new Vector3[3 * LibSM64Interop.MARIO_GEO_BUFFER_SIZE];
-        normalBuffer = new Vector3[3 * LibSM64Interop.MARIO_GEO_BUFFER_SIZE];
-        colorBuffer = new Vector3[3 * LibSM64Interop.MARIO_GEO_BUFFER_SIZE];
+        positionBuffer = new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES];
+        normalBuffer = new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES];
+        colorBuffer = new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES];
+        uvBuffer = new Vector2[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES];
 
         mesh1 = new Mesh();
         mesh1.vertices = positionBuffer;
@@ -81,16 +83,17 @@ public class SM64Mario : MonoBehaviour
         inputs.buttonB = Input.GetButton("Kick") ? (byte)1 : (byte)0;
         inputs.buttonZ = Input.GetButton("Z") ? (byte)1 : (byte)0;
 
-        var state = LibSM64Interop.MarioTick( inputs, positionBuffer, normalBuffer, colorBuffer );
+        var state = LibSM64Interop.MarioTick( inputs, positionBuffer, normalBuffer, colorBuffer, uvBuffer );
 
         mesh1.vertices = positionBuffer;
         mesh1.normals = normalBuffer;
-        mesh1.colors = colorBuffer.Select( x => new Color( x.x, x.y, x.z, 1 )).ToArray(); // TODO only update color buffer when hash changes
+        mesh1.colors = colorBuffer.Select( x => new Color( x.x, x.y, x.z, 1 )).ToArray(); // TODO Don't use linq
+        mesh1.uv = uvBuffer;
 
         mesh1.RecalculateBounds();
         mesh1.RecalculateTangents();
 
-        lastMarioPos = new Vector3( -state.position[0], state.position[1], state.position[2] ) / LibSM64Interop.SCALE_FACTOR;
+        //lastMarioPos = new Vector3( -state.position[0], state.position[1], state.position[2] ) / LibSM64Interop.SCALE_FACTOR;
 
         var targPos = lastMarioPos;
         targPos.x = cam.transform.position.x;
