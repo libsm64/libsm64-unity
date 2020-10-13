@@ -46,6 +46,8 @@ public class SM64Mario : MonoBehaviour
             }
         }
 
+        GetComponent<MeshRenderer>().material.SetTexture("_MainTex", LibSM64Interop.marioTexture);
+
         var arr = surfaces.ToArray();
 
         LibSM64Interop.LoadSurfaces( SM64TerrainType.TERRAIN_STONE, surfaces.ToArray() );

@@ -63,6 +63,8 @@ public static class LibSM64Interop
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     delegate void DebugPrintFuncDelegate(string str);
 
+    static public Texture2D marioTexture;
+
     static void debugPrintCallback(string str)
     {
         Debug.Log("libsm64: " + str);
@@ -77,6 +79,21 @@ public static class LibSM64Interop
 
         sm64_global_terminate();
         sm64_global_init( romHandle.AddrOfPinnedObject(), textureDataHandle.AddrOfPinnedObject(), Marshal.GetFunctionPointerForDelegate( callbackDelegate ));
+
+        Color32[] cols = new Color32[ SM64_TEXTURE_WIDTH * SM64_TEXTURE_HEIGHT ];
+        marioTexture = new Texture2D( SM64_TEXTURE_WIDTH, SM64_TEXTURE_HEIGHT );
+        for( int ix = 0; ix <SM64_TEXTURE_WIDTH; ix++)
+        for( int iy = 0; iy <SM64_TEXTURE_HEIGHT; iy++)
+        {
+            cols[ix +SM64_TEXTURE_WIDTH*iy] = new Color32(
+                textureData[4*(ix +SM64_TEXTURE_WIDTH*iy)+0],
+                textureData[4*(ix +SM64_TEXTURE_WIDTH*iy)+1],
+                textureData[4*(ix +SM64_TEXTURE_WIDTH*iy)+2],
+                textureData[4*(ix +SM64_TEXTURE_WIDTH*iy)+3]
+            );
+        }
+        marioTexture.SetPixels32( cols );
+        marioTexture.Apply();
 
         romHandle.Free();
         textureDataHandle.Free();
@@ -99,6 +116,7 @@ public static class LibSM64Interop
         var posHandle = GCHandle.Alloc( positionBuffer, GCHandleType.Pinned );
         var normHandle = GCHandle.Alloc( normalBuffer, GCHandleType.Pinned );
         var colorHandle = GCHandle.Alloc( colorBuffer, GCHandleType.Pinned );
+
         var uvHandle = GCHandle.Alloc( uvBuffer, GCHandleType.Pinned );
 
         SM64MarioGeometryBuffers buff = new SM64MarioGeometryBuffers
