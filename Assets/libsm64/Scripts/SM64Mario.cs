@@ -13,10 +13,12 @@ public class SM64Mario : MonoBehaviour
     Vector3[] lerpPositionBuffer;
     Vector3[] lerpNormalBuffer;
     Vector3[] colorBuffer;
+    Color[] colorBufferColors;
     Vector2[] uvBuffer;
 
-    Mesh mesh1;
+    Mesh marioMesh;
     int buffIndex;
+    Camera cam;
 
     void Awake()
     {
@@ -68,18 +70,19 @@ public class SM64Mario : MonoBehaviour
         positionBuffers = new Vector3[][] { new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES], new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES] };
         normalBuffers = new Vector3[][] { new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES], new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES] };
         colorBuffer = new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES];
+        colorBufferColors = new Color[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES];
         uvBuffer = new Vector2[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES];
 
-        mesh1 = new Mesh();
-        mesh1.vertices = lerpPositionBuffer;
-        mesh1.triangles = Enumerable.Range(0, 3*1024).ToArray();
-        GetComponent<MeshFilter>().sharedMesh = mesh1;
+        marioMesh = new Mesh();
+        marioMesh.vertices = lerpPositionBuffer;
+        marioMesh.triangles = Enumerable.Range(0, 3*LibSM64Interop.SM64_GEO_MAX_TRIANGLES).ToArray();
+        GetComponent<MeshFilter>().sharedMesh = marioMesh;
+
+        cam = FindObjectOfType<Camera>();
     }
 
     void FixedUpdate() 
     {
-        var cam = FindObjectOfType<Camera>();
-
         var inputs = new LibSM64Interop.SM64MarioInputs();
         var look = lastMarioPos - cam.transform.position;
         look.y = 0;
@@ -95,28 +98,31 @@ public class SM64Mario : MonoBehaviour
 
         var state = LibSM64Interop.MarioTick( inputs, positionBuffers[buffIndex], normalBuffers[buffIndex], colorBuffer, uvBuffer );
 
+        for( int i = 0; i < colorBuffer.Length; ++i )
+            colorBufferColors[i] = new Color( colorBuffer[i].x, colorBuffer[i].y, colorBuffer[i].z, 1 );
+
+        marioMesh.colors = colorBufferColors;
+        marioMesh.uv = uvBuffer;
+
         buffIndex = 1 - buffIndex;
     }
 
     void Update()
     {
-        var cam = FindObjectOfType<Camera>();
-
         float t = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
         int j = (buffIndex + 1) % 2;
+
         for( int i = 0; i < lerpPositionBuffer.Length; ++i )
         {
             lerpPositionBuffer[i] = Vector3.LerpUnclamped( positionBuffers[buffIndex][i], positionBuffers[j][i], t );
             lerpNormalBuffer[i] = Vector3.LerpUnclamped( normalBuffers[buffIndex][i], normalBuffers[j][i], t );
         }
 
-        mesh1.vertices = lerpPositionBuffer;
-        mesh1.normals = lerpNormalBuffer;
-        mesh1.colors = colorBuffer.Select( x => new Color( x.x, x.y, x.z, 1 )).ToArray(); // TODO Don't use linq
-        mesh1.uv = uvBuffer;
+        marioMesh.vertices = lerpPositionBuffer;
+        marioMesh.normals = lerpNormalBuffer;
 
-        mesh1.RecalculateBounds();
-        mesh1.RecalculateTangents();
+        marioMesh.RecalculateBounds();
+        marioMesh.RecalculateTangents();
 
         var targPos = lastMarioPos;
         targPos.x = cam.transform.position.x;
