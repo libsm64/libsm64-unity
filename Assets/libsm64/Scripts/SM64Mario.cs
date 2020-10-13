@@ -6,11 +6,17 @@ using UnityEngine;
 public class SM64Mario : MonoBehaviour
 {
     Vector3 lastMarioPos = Vector3.zero;
-    Vector3[] positionBuffer;
-    Vector3[] normalBuffer;
+
+    Vector3[][] positionBuffers;
+    Vector3[][] normalBuffers;
+
+    Vector3[] lerpPositionBuffer;
+    Vector3[] lerpNormalBuffer;
     Vector3[] colorBuffer;
     Vector2[] uvBuffer;
+
     Mesh mesh1;
+    int buffIndex;
 
     void Awake()
     {
@@ -57,13 +63,15 @@ public class SM64Mario : MonoBehaviour
         transform.localScale = new Vector3( -1, 1, 1 ) / LibSM64Interop.SCALE_FACTOR;
         transform.localPosition = Vector3.zero;
 
-        positionBuffer = new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES];
-        normalBuffer = new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES];
+        lerpPositionBuffer = new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES];
+        lerpNormalBuffer = new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES];
+        positionBuffers = new Vector3[][] { new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES], new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES] };
+        normalBuffers = new Vector3[][] { new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES], new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES] };
         colorBuffer = new Vector3[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES];
         uvBuffer = new Vector2[3 * LibSM64Interop.SM64_GEO_MAX_TRIANGLES];
 
         mesh1 = new Mesh();
-        mesh1.vertices = positionBuffer;
+        mesh1.vertices = lerpPositionBuffer;
         mesh1.triangles = Enumerable.Range(0, 3*1024).ToArray();
         GetComponent<MeshFilter>().sharedMesh = mesh1;
     }
@@ -85,17 +93,30 @@ public class SM64Mario : MonoBehaviour
         inputs.buttonB = Input.GetButton("Kick") ? (byte)1 : (byte)0;
         inputs.buttonZ = Input.GetButton("Z") ? (byte)1 : (byte)0;
 
-        var state = LibSM64Interop.MarioTick( inputs, positionBuffer, normalBuffer, colorBuffer, uvBuffer );
+        var state = LibSM64Interop.MarioTick( inputs, positionBuffers[buffIndex], normalBuffers[buffIndex], colorBuffer, uvBuffer );
 
-        mesh1.vertices = positionBuffer;
-        mesh1.normals = normalBuffer;
+        buffIndex = 1 - buffIndex;
+    }
+
+    void Update()
+    {
+        var cam = FindObjectOfType<Camera>();
+
+        float t = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
+        int j = (buffIndex + 1) % 2;
+        for( int i = 0; i < lerpPositionBuffer.Length; ++i )
+        {
+            lerpPositionBuffer[i] = Vector3.LerpUnclamped( positionBuffers[buffIndex][i], positionBuffers[j][i], t );
+            lerpNormalBuffer[i] = Vector3.LerpUnclamped( normalBuffers[buffIndex][i], normalBuffers[j][i], t );
+        }
+
+        mesh1.vertices = lerpPositionBuffer;
+        mesh1.normals = lerpNormalBuffer;
         mesh1.colors = colorBuffer.Select( x => new Color( x.x, x.y, x.z, 1 )).ToArray(); // TODO Don't use linq
         mesh1.uv = uvBuffer;
 
         mesh1.RecalculateBounds();
         mesh1.RecalculateTangents();
-
-        //lastMarioPos = new Vector3( -state.position[0], state.position[1], state.position[2] ) / LibSM64Interop.SCALE_FACTOR;
 
         var targPos = lastMarioPos;
         targPos.x = cam.transform.position.x;
