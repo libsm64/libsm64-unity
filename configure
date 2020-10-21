@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-set -e
-cd "$(dirname "${BASH_SOURCE[0]}")"
-
-git submodule update --init --recursive
-cd libsm64
-./configure
-make
-cp dist/libsm64.so ../Assets/libsm64/Plugins/libsm64.so

@@ -1,0 +1,7 @@
+{
+  "name": "com.libsm64.libsm64",
+  "version": "0.0.1",
+  "displayName": "LibSM64 for Unity",
+  "description": "Embeddable Mario",
+  "unity": "2019.3"
+}
