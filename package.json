@@ -4,10 +4,9 @@
   "displayName": "LibSM64 for Unity",
   "description": "Embeddable Mario",
   "unity": "2019.3",
-  "samples": [
-  {
+  "samples": [{
     "displayName": "Sample Scene",
     "description": "A sample scene",
-    "path": "Samples~/SampleScene"
+    "path": "Samples/SampleScene"
   }]
 }
