@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class SM64Mario : MonoBehaviour
 {
-
     Vector3[][] positionBuffers;
     Vector3[][] normalBuffers;
 
@@ -148,5 +147,11 @@ public class SM64Mario : MonoBehaviour
 
        // cam.transform.position += (targPos - cam.transform.position) * .25f;
        // cam.transform.LookAt( marioPos );
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere( transform.position, 1.0f );
     }
 }
