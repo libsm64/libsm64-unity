@@ -1,7 +1,13 @@
 {
-  "name": "com.libsm64.libsm64",
+  "name": "com.libsm64.libsm64-unity",
   "version": "0.0.1",
   "displayName": "LibSM64 for Unity",
   "description": "Embeddable Mario",
-  "unity": "2019.3"
+  "unity": "2019.3",
+  "samples": [
+  {
+    "displayName": "Sample Scene",
+    "description": "A sample scene",
+    "path": "Samples~/SampleScene"
+  },
 }
