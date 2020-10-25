@@ -1,44 +1,29 @@
-using System;
-using System.IO;
-using System.Linq;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 namespace LibSM64
 {
-    internal class SM64Context
+    public class SM64Context : MonoBehaviour
     {
-        static SM64Context s_instance;
+        static SM64Context s_instance = null;
 
-        static public SM64Context Instance
-        {
-            get
-            {
-                if( s_instance == null )
-                {
-                    var contextGo = new GameObject( "SM64_CONTEXT" );
-                    s_instance = new SM64Context( contextGo.AddComponent<SM64ContextObject>() );
-                }
-                return s_instance;
-            }
-        }
-
-        SM64ContextObject _contextObject;
         List<SM64Mario> _marios = new List<SM64Mario>();
         List<SM64SurfaceObject> _surfaceObjects = new List<SM64SurfaceObject>();
-        bool _registeredMeshColliders = false;
 
-        SM64Context( SM64ContextObject contextObject )
+        void Awake()
         {
-            _contextObject = contextObject;
-            _contextObject.BindUpdateListeners( onUpdate, onFixedUpdate );
-
             Interop.InitWithROM( File.ReadAllBytes( Application.dataPath + "/../baserom.us.z64" ));
-
-            RegisterStaticMeshColliders();
+            RefreshStaticTerrain();
         }
 
-        void onFixedUpdate()
+        void Update()
+        {
+            foreach( var o in _marios )
+                o.contextUpdate();
+        }
+
+        void FixedUpdate()
         {
             foreach( var o in _surfaceObjects )
                 o.contextFixedUpdate();
@@ -47,84 +32,57 @@ namespace LibSM64
                 o.contextFixedUpdate();
         }
 
-        void onUpdate()
+        void OnApplicationQuit()
         {
-            foreach( var o in _marios )
-                o.contextUpdate();
+            Interop.Terminate();
+            s_instance = null;
         }
 
-        public void RegisterStaticMeshColliders()
+        static void ensureInstanceExists()
         {
-            var surfaces = new List<Interop.SM64Surface>();
-            var meshColliders = GameObject.FindObjectsOfType<MeshCollider>();
-
-            foreach( var mc in meshColliders )
+            if( s_instance == null )
             {
-                if( mc.GetComponent<SM64SurfaceObject>() != null )
-                    continue;
-
-                var mesh = mc.sharedMesh;
-                var tris = mesh.GetTriangles(0);
-
-                var vertices = mesh.vertices.Select(x => {
-                    return mc.transform.TransformPoint( x );
-                }).ToArray();
-
-                for( int i = 0; i < tris.Length; i += 3 )
-                {
-                    surfaces.Add(new Interop.SM64Surface {
-                        force = 0,
-                        type = 0,
-                        v0x = (short)(Interop.SCALE_FACTOR * -vertices[tris[i  ]].x),
-                        v0y = (short)(Interop.SCALE_FACTOR *  vertices[tris[i  ]].y),
-                        v0z = (short)(Interop.SCALE_FACTOR *  vertices[tris[i  ]].z),
-                        v1x = (short)(Interop.SCALE_FACTOR * -vertices[tris[i+2]].x),
-                        v1y = (short)(Interop.SCALE_FACTOR *  vertices[tris[i+2]].y),
-                        v1z = (short)(Interop.SCALE_FACTOR *  vertices[tris[i+2]].z),
-                        v2x = (short)(Interop.SCALE_FACTOR * -vertices[tris[i+1]].x),
-                        v2y = (short)(Interop.SCALE_FACTOR *  vertices[tris[i+1]].y),
-                        v2z = (short)(Interop.SCALE_FACTOR *  vertices[tris[i+1]].z)
-                    });
-                }
+                var contextGo = new GameObject( "SM64_CONTEXT" );
+                s_instance = contextGo.AddComponent<SM64Context>();
             }
-
-            Interop.LoadSurfaces( SM64TerrainType.TERRAIN_STONE, surfaces.ToArray() );
-
-            _registeredMeshColliders = true;
         }
 
-        public void RegisterMario( SM64Mario mario )
+        static public void RefreshStaticTerrain()
         {
-            if( !_registeredMeshColliders )
-                RegisterStaticMeshColliders();
+            Interop.LoadSurfaces( SM64TerrainType.TERRAIN_STONE, Utils.GetAllStaticSurfaces());
+        }
 
-            if( !_marios.Contains( mario ))
+        static public void RegisterMario( SM64Mario mario )
+        {
+            ensureInstanceExists();
+
+            if( !s_instance._marios.Contains( mario ))
             {
-                _marios.Add( mario );
+                s_instance._marios.Add( mario );
 
                 var pos = mario.transform.position;
                 Interop.MarioReset( new Vector3( -pos.x, pos.y, pos.z ) * Interop.SCALE_FACTOR );
             }
         }
 
-        public void UnregisterMario( SM64Mario mario )
+        static public void UnregisterMario( SM64Mario mario )
         {
-            if( _marios.Contains( mario ))
-                _marios.Remove( mario );
+            if( s_instance != null && s_instance._marios.Contains( mario ))
+                s_instance._marios.Remove( mario );
         }
 
-        public void RegisterSurfaceObject( SM64SurfaceObject surfaceObject )
+        static public void RegisterSurfaceObject( SM64SurfaceObject surfaceObject )
         {
-            if( !_surfaceObjects.Contains( surfaceObject ))
-            {
-                _surfaceObjects.Add( surfaceObject );
-            }
+            ensureInstanceExists();
+
+            if( !s_instance._surfaceObjects.Contains( surfaceObject ))
+                s_instance._surfaceObjects.Add( surfaceObject );
         }
 
-        public void UnregisterSurfaceObject( SM64SurfaceObject surfaceObject )
+        static public void UnregisterSurfaceObject( SM64SurfaceObject surfaceObject )
         {
-            if( _surfaceObjects.Contains( surfaceObject ))
-                _surfaceObjects.Remove( surfaceObject );
+            if( s_instance != null && s_instance._surfaceObjects.Contains( surfaceObject ))
+                s_instance._surfaceObjects.Remove( surfaceObject );
         }
     }
 }

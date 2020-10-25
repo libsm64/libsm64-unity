@@ -43,7 +43,7 @@ namespace LibSM64
             public short health;
 
             public Vector3 unityPosition {
-                get { return new Vector3( -position[0], position[1], position[2] ) / SCALE_FACTOR; }
+                get { return position != null ? new Vector3( -position[0], position[1], position[2] ) / SCALE_FACTOR : Vector3.zero; }
             }
         };
 
@@ -161,6 +161,11 @@ namespace LibSM64
             textureDataHandle.Free();
         }
 
+        public static void Terminate()
+        {
+            sm64_global_terminate();
+        }
+
         public static void LoadSurfaces( SM64TerrainType terrainType, SM64Surface[] surfaces )
         {
             sm64_load_surfaces( (ushort)terrainType, surfaces, (ulong)surfaces.Length );
@@ -194,6 +199,11 @@ namespace LibSM64
         {
             var t = SM64ObjectTransform.FromUnityTransform( transform );
             sm64_move_object( id, ref t );
+        }
+
+        public static void UnloadObject( uint id )
+        {
+            sm64_unload_object( id );
         }
 
         public static SM64MarioState MarioTick(  SM64MarioInputs inputs, Vector3[] positionBuffer, Vector3[] normalBuffer, Vector3[] colorBuffer, Vector2[] uvBuffer )

@@ -9,7 +9,7 @@ namespace LibSM64
 
         void Start()
         {
-            SM64Context.Instance.RegisterSurfaceObject( this );
+            SM64Context.RegisterSurfaceObject( this );
 
             var mc = GetComponent<MeshCollider>();
             var surfaces = Utils.GetSurfacesForMesh( transform.lossyScale, mc.sharedMesh );
@@ -21,9 +21,11 @@ namespace LibSM64
             Interop.MoveObject( _surfaceObjectId, transform );
         }
 
-        void OnDestroy()
+        void OnDisable()
         {
-            SM64Context.Instance.UnregisterSurfaceObject( this );
+            SM64Context.UnregisterSurfaceObject( this );
+
+            Interop.UnloadObject( _surfaceObjectId );
         }
     }
 }

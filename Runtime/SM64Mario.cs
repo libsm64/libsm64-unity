@@ -25,9 +25,9 @@ namespace LibSM64
 
         public Vector3 actualPosition { get; private set; }
 
-        void Awake()
+        void Start()
         {
-            SM64Context.Instance.RegisterMario( this );
+            SM64Context.RegisterMario( this );
 
             var initPos = transform.position;
             Interop.MarioReset( new Vector3( -initPos.x, initPos.y, initPos.z ) * Interop.SCALE_FACTOR );
@@ -65,9 +65,9 @@ namespace LibSM64
             meshFilter.sharedMesh = marioMesh;
         }
 
-        void OnDestroy()
+        void OnDisable()
         {
-            SM64Context.Instance.UnregisterMario( this );
+            SM64Context.UnregisterMario( this );
         }
 
         public void contextFixedUpdate()
