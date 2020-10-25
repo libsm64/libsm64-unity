@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class SM64Mario : MonoBehaviour
 {
+    [SerializeField]
+    Material material = null;
+
     Vector3[][] positionBuffers;
     Vector3[][] normalBuffers;
 
@@ -22,6 +25,10 @@ public class SM64Mario : MonoBehaviour
 
     void Awake()
     {
+        var renderer = gameObject.AddComponent<MeshRenderer>();
+        renderer.sharedMaterial = material;
+        var meshFilter = gameObject.AddComponent<MeshFilter>();
+
         LibSM64Interop.InitWithROM(File.ReadAllBytes(Application.dataPath + "/../baserom.us.z64"));
 
         var surfaces = new List<LibSM64Interop.SM64Surface>();
@@ -81,7 +88,7 @@ public class SM64Mario : MonoBehaviour
         marioMesh = new Mesh();
         marioMesh.vertices = lerpPositionBuffer;
         marioMesh.triangles = Enumerable.Range(0, 3*LibSM64Interop.SM64_GEO_MAX_TRIANGLES).ToArray();
-        GetComponent<MeshFilter>().sharedMesh = marioMesh;
+        meshFilter.sharedMesh = marioMesh;
 
         cam = FindObjectOfType<Camera>();
     }
@@ -152,6 +159,6 @@ public class SM64Mario : MonoBehaviour
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere( transform.position, 1.0f );
+        Gizmos.DrawSphere( transform.position, 0.5f );
     }
 }

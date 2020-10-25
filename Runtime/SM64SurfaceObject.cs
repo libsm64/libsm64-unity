@@ -9,6 +9,16 @@ public class SM64SurfaceObject : MonoBehaviour
         return new float[] { v.x, v.y, v.z };
     }
 
+    static float fmod( float a, float b )
+    {
+        return a - b * Mathf.Floor( a / b );
+    }
+    
+    static float fixAngle( float a )
+    {
+        return fmod( a + 180.0f, 360.0f ) - 180.0f;
+    }
+
     uint _surfaceObjectId;
 
     LibSM64Interop.SM64ObjectTransform GetTransform()
@@ -16,13 +26,9 @@ public class SM64SurfaceObject : MonoBehaviour
         var pos = LibSM64Interop.SCALE_FACTOR * Vector3.Scale( transform.position, new Vector3( -1, 1, 1 ));
         var rot = Vector3.Scale( transform.rotation.eulerAngles, new Vector3( -1, 1, 1 ));
 
-        // QUality programming right here
-        while( rot.x < -180.0f ) rot.x += 360.0f;
-        while( rot.y < -180.0f ) rot.y += 360.0f;
-        while( rot.z < -180.0f ) rot.z += 360.0f;
-        while( rot.x >  180.0f ) rot.x -= 360.0f;
-        while( rot.y >  180.0f ) rot.y -= 360.0f;
-        while( rot.z >  180.0f ) rot.z -= 360.0f;
+        rot.x = fixAngle( rot.x );
+        rot.y = fixAngle( rot.y );
+        rot.z = fixAngle( rot.z );
 
         return new LibSM64Interop.SM64ObjectTransform {
             position = vecToArr( pos ),
