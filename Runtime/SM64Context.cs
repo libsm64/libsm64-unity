@@ -57,12 +57,7 @@ namespace LibSM64
             ensureInstanceExists();
 
             if( !s_instance._marios.Contains( mario ))
-            {
                 s_instance._marios.Add( mario );
-
-                var pos = mario.transform.position;
-                Interop.MarioReset( new Vector3( -pos.x, pos.y, pos.z ) * Interop.SCALE_FACTOR );
-            }
         }
 
         static public void UnregisterMario( SM64Mario mario )
