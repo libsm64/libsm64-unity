@@ -321,6 +321,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1044714404}
+  - component: {fileID: 1044714405}
   - component: {fileID: 1044714403}
   - component: {fileID: 1044714402}
   - component: {fileID: 1044714401}
@@ -400,12 +401,26 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1044714400}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.35, y: -0.35, z: 9.56}
+  m_LocalPosition: {x: -50.23, y: -0.35, z: 9.56}
   m_LocalScale: {x: 11.869, y: 1, z: 10.409}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1044714405
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1044714400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d07c4c311d4ebf7c8a3ca1785abbcb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  terrainType: 1
+  surfaceType: 0
 --- !u!1 &1561688612
 GameObject:
   m_ObjectHideFlags: 0
@@ -415,12 +430,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1561688616}
+  - component: {fileID: 1561688613}
+  - component: {fileID: 1561688618}
   - component: {fileID: 1561688615}
   - component: {fileID: 1561688614}
   - component: {fileID: 1561688617}
-  - component: {fileID: 1561688613}
   m_Layer: 0
-  m_Name: Platform
+  m_Name: MovingPlatform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -438,6 +454,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c20b350fc053bebea8a1d907d10860f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  terrainType: 1
+  surfaceType: 21
 --- !u!23 &1561688614
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -513,6 +531,18 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1561688618
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1561688612}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6db8a80474874cc7581a1f6bf5e5958a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1677693779
 GameObject:
   m_ObjectHideFlags: 0
@@ -552,7 +582,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1677693779}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.14, y: 1.39, z: 8.61}
+  m_LocalPosition: {x: -49.02, y: 1.39, z: 8.61}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -580,6 +610,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1683195587}
+  - component: {fileID: 1683195588}
   - component: {fileID: 1683195586}
   - component: {fileID: 1683195585}
   - component: {fileID: 1683195584}
@@ -622,7 +653,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: db0929541b7d4e749826b59a52ac58e3, type: 2}
+  - {fileID: 2100000, guid: 64f0c04087780084d933dbeab8ccfb50, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -659,9 +690,23 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1683195583}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: -14.68, z: 0}
-  m_LocalScale: {x: 100, y: 100, z: 1}
+  m_LocalPosition: {x: 0, y: -4.98, z: 0}
+  m_LocalScale: {x: 200, y: 200, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!114 &1683195588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1683195583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d07c4c311d4ebf7c8a3ca1785abbcb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  terrainType: 1
+  surfaceType: 10

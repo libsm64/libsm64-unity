@@ -9,7 +9,7 @@ namespace LibSM64
         static SM64Context s_instance = null;
 
         List<SM64Mario> _marios = new List<SM64Mario>();
-        List<SM64SurfaceObject> _surfaceObjects = new List<SM64SurfaceObject>();
+        List<SM64DynamicTerrain> _surfaceObjects = new List<SM64DynamicTerrain>();
 
         void Awake()
         {
@@ -52,7 +52,7 @@ namespace LibSM64
 
         static public void RefreshStaticTerrain()
         {
-            Interop.LoadSurfaces( SM64TerrainType.TERRAIN_STONE, Utils.GetAllStaticSurfaces());
+            Interop.LoadSurfaces( SM64TerrainType.Stone, Utils.GetAllStaticSurfaces());
         }
 
         static public void RegisterMario( SM64Mario mario )
@@ -69,7 +69,7 @@ namespace LibSM64
                 s_instance._marios.Remove( mario );
         }
 
-        static public void RegisterSurfaceObject( SM64SurfaceObject surfaceObject )
+        static public void RegisterSurfaceObject( SM64DynamicTerrain surfaceObject )
         {
             ensureInstanceExists();
 
@@ -77,7 +77,7 @@ namespace LibSM64
                 s_instance._surfaceObjects.Add( surfaceObject );
         }
 
-        static public void UnregisterSurfaceObject( SM64SurfaceObject surfaceObject )
+        static public void UnregisterSurfaceObject( SM64DynamicTerrain surfaceObject )
         {
             if( s_instance != null && s_instance._surfaceObjects.Contains( surfaceObject ))
                 s_instance._surfaceObjects.Remove( surfaceObject );
