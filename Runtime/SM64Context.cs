@@ -19,6 +19,9 @@ namespace LibSM64
 
         void Update()
         {
+            foreach( var o in _surfaceObjects )
+                o.contextUpdate();
+
             foreach( var o in _marios )
                 o.contextUpdate();
         }

@@ -65,7 +65,7 @@ namespace LibSM64
             [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 3)]
             float[] eulerRotation;
 
-            static public SM64ObjectTransform FromUnityTransform( Transform t )
+            static public SM64ObjectTransform FromUnityWorld( Vector3 position, Quaternion rotation )
             {
                 float[] vecToArr( Vector3 v )
                 {
@@ -82,8 +82,8 @@ namespace LibSM64
                     return fmod( a + 180.0f, 360.0f ) - 180.0f;
                 }
 
-                var pos = SCALE_FACTOR * Vector3.Scale( t.position, new Vector3( -1, 1, 1 ));
-                var rot = Vector3.Scale( t.rotation.eulerAngles, new Vector3( -1, 1, 1 ));
+                var pos = SCALE_FACTOR * Vector3.Scale( position, new Vector3( -1, 1, 1 ));
+                var rot = Vector3.Scale( rotation.eulerAngles, new Vector3( -1, 1, 1 ));
 
                 rot.x = fixAngle( rot.x );
                 rot.y = fixAngle( rot.y );
@@ -176,10 +176,10 @@ namespace LibSM64
             sm64_mario_reset( (short)marioPos.x, (short)marioPos.y, (short)marioPos.z );
         }
 
-        public static uint LoadSurfaceObject( Transform transform, SM64Surface[] surfaces )
+        public static uint LoadSurfaceObject( Vector3 position, Quaternion rotation, SM64Surface[] surfaces )
         {
             var surfListHandle = GCHandle.Alloc( surfaces, GCHandleType.Pinned );
-            var t = SM64ObjectTransform.FromUnityTransform( transform );
+            var t = SM64ObjectTransform.FromUnityWorld( position, rotation );
 
             SM64SurfaceObject surfObj = new SM64SurfaceObject
             {
@@ -195,9 +195,9 @@ namespace LibSM64
             return result;
         }
 
-        public static void MoveObject( uint id, Transform transform )
+        public static void MoveObject( uint id, Vector3 position, Quaternion rotation )
         {
-            var t = SM64ObjectTransform.FromUnityTransform( transform );
+            var t = SM64ObjectTransform.FromUnityWorld( position, rotation );
             sm64_move_object( id, ref t );
         }
 
