@@ -11,17 +11,16 @@ namespace LibSM64
 
         Vector3[][] positionBuffers;
         Vector3[][] normalBuffers;
-
         Vector3[] lerpPositionBuffer;
         Vector3[] lerpNormalBuffer;
         Vector3[] colorBuffer;
         Color[] colorBufferColors;
         Vector2[] uvBuffer;
+        int buffIndex;
+        Interop.SM64MarioState[] states;
 
         Mesh marioMesh;
-        int buffIndex;
-
-        Interop.SM64MarioState[] states;
+        uint marioId;
 
         public Vector3 actualPosition { get; private set; }
 
@@ -30,7 +29,7 @@ namespace LibSM64
             SM64Context.RegisterMario( this );
 
             var initPos = transform.position;
-            Interop.MarioReset( new Vector3( -initPos.x, initPos.y, initPos.z ) * Interop.SCALE_FACTOR );
+            marioId = Interop.MarioCreate( new Vector3( -initPos.x, initPos.y, initPos.z ) * Interop.SCALE_FACTOR );
 
             inputProvider = GetComponent<SM64InputProvider>();
             if( inputProvider == null )
@@ -68,6 +67,7 @@ namespace LibSM64
         void OnDisable()
         {
             SM64Context.UnregisterMario( this );
+            Interop.MarioDelete( marioId );
         }
 
         public void contextFixedUpdate()
@@ -87,7 +87,7 @@ namespace LibSM64
             inputs.buttonB = inputProvider.GetButtonHeld( SM64InputProvider.Button.Kick  ) ? (byte)1 : (byte)0;
             inputs.buttonZ = inputProvider.GetButtonHeld( SM64InputProvider.Button.Stomp ) ? (byte)1 : (byte)0;
 
-            states[buffIndex] = Interop.MarioTick( inputs, positionBuffers[buffIndex], normalBuffers[buffIndex], colorBuffer, uvBuffer );
+            states[buffIndex] = Interop.MarioTick( marioId, inputs, positionBuffers[buffIndex], normalBuffers[buffIndex], colorBuffer, uvBuffer );
 
             for( int i = 0; i < colorBuffer.Length; ++i )
                 colorBufferColors[i] = new Color( colorBuffer[i].x, colorBuffer[i].y, colorBuffer[i].z, 1 );

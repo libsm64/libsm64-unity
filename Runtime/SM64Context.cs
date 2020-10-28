@@ -13,7 +13,7 @@ namespace LibSM64
 
         void Awake()
         {
-            Interop.InitWithROM( File.ReadAllBytes( Application.dataPath + "/../baserom.us.z64" ));
+            Interop.GlobalInit( File.ReadAllBytes( Application.dataPath + "/../baserom.us.z64" ));
             RefreshStaticTerrain();
         }
 
@@ -37,7 +37,7 @@ namespace LibSM64
 
         void OnApplicationQuit()
         {
-            Interop.Terminate();
+            Interop.GlobalTerminate();
             s_instance = null;
         }
 
@@ -52,7 +52,7 @@ namespace LibSM64
 
         static public void RefreshStaticTerrain()
         {
-            Interop.LoadSurfaces( SM64TerrainType.Stone, Utils.GetAllStaticSurfaces());
+            Interop.StaticSurfacesLoad( Utils.GetAllStaticSurfaces());
         }
 
         static public void RegisterMario( SM64Mario mario )

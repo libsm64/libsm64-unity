@@ -7,7 +7,7 @@ namespace LibSM64
 {
     static internal class Utils
     {
-        static void transformAndGetSurfaces( List<Interop.SM64Surface> outSurfaces, Mesh mesh, SM64SurfaceType surfaceType, Func<Vector3,Vector3> transformFunc )
+        static void transformAndGetSurfaces( List<Interop.SM64Surface> outSurfaces, Mesh mesh, SM64SurfaceType surfaceType, SM64TerrainType terrainType, Func<Vector3,Vector3> transformFunc )
         {
             var tris = mesh.GetTriangles(0);
             var vertices = mesh.vertices.Select(transformFunc).ToArray();
@@ -17,6 +17,7 @@ namespace LibSM64
                 outSurfaces.Add(new Interop.SM64Surface {
                     force = 0,
                     type = (short)surfaceType,
+                    terrain = (ushort)terrainType,
                     v0x = (short)(Interop.SCALE_FACTOR * -vertices[tris[i  ]].x),
                     v0y = (short)(Interop.SCALE_FACTOR *  vertices[tris[i  ]].y),
                     v0z = (short)(Interop.SCALE_FACTOR *  vertices[tris[i  ]].z),
@@ -30,10 +31,10 @@ namespace LibSM64
             }
         }
 
-        static public Interop.SM64Surface[] GetSurfacesForMesh( Vector3 scale, Mesh mesh, SM64SurfaceType surfaceType )
+        static public Interop.SM64Surface[] GetSurfacesForMesh( Vector3 scale, Mesh mesh, SM64SurfaceType surfaceType, SM64TerrainType terrainType )
         {
             var surfaces = new List<Interop.SM64Surface>();
-            transformAndGetSurfaces( surfaces, mesh, surfaceType, x => Vector3.Scale( scale, x ));
+            transformAndGetSurfaces( surfaces, mesh, surfaceType, terrainType, x => Vector3.Scale( scale, x ));
             return surfaces.ToArray();
         }
 
@@ -44,7 +45,7 @@ namespace LibSM64
             foreach( var obj in GameObject.FindObjectsOfType<SM64StaticTerrain>())
             {
                 var mc = obj.GetComponent<MeshCollider>();
-                transformAndGetSurfaces( surfaces, mc.sharedMesh, obj.SurfaceType, x => mc.transform.TransformPoint( x ));
+                transformAndGetSurfaces( surfaces, mc.sharedMesh, obj.SurfaceType, obj.TerrainType, x => mc.transform.TransformPoint( x ));
             }
 
             return surfaces.ToArray();

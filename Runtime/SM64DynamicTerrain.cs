@@ -36,8 +36,8 @@ namespace LibSM64
             _nextRotation = _rotation;
 
             var mc = GetComponent<MeshCollider>();
-            var surfaces = Utils.GetSurfacesForMesh( transform.lossyScale, mc.sharedMesh, surfaceType );
-            _surfaceObjectId = Interop.LoadSurfaceObject( _position, _rotation, surfaces.ToArray() );
+            var surfaces = Utils.GetSurfacesForMesh( transform.lossyScale, mc.sharedMesh, surfaceType, terrainType );
+            _surfaceObjectId = Interop.SurfaceObjectCreate( _position, _rotation, surfaces.ToArray() );
         }
 
         internal void contextFixedUpdate()
@@ -49,7 +49,7 @@ namespace LibSM64
             {
                 _position = _nextPosition;
                 _rotation = _nextRotation;
-                Interop.MoveObject( _surfaceObjectId, _position, _rotation );
+                Interop.SurfaceObjectMove( _surfaceObjectId, _position, _rotation );
             }
         }
 
@@ -75,7 +75,7 @@ namespace LibSM64
         {
             SM64Context.UnregisterSurfaceObject( this );
 
-            Interop.UnloadObject( _surfaceObjectId );
+            Interop.SurfaceObjectDelete( _surfaceObjectId );
         }
     }
 }
