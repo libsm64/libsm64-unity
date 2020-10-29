@@ -25,8 +25,6 @@ namespace LibSM64
 
         void OnEnable()
         {
-            Debug.Log("ONENABLE");
-
             SM64Context.RegisterMario( this );
 
             var initPos = transform.position;
@@ -69,8 +67,6 @@ namespace LibSM64
 
         void OnDisable()
         {
-            Debug.Log("ONDIS");
-
             if( marioRendererObject != null )
             {
                 Destroy( marioRendererObject );

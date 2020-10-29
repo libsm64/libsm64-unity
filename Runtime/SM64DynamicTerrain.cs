@@ -24,7 +24,7 @@ namespace LibSM64
         public Quaternion rotation     { get { return _rotation;     }}
         public Quaternion lastRotation { get { return _lastRotation; }}
 
-        void Start()
+        void OnEnable()
         {
             SM64Context.RegisterSurfaceObject( this );
 
@@ -38,6 +38,15 @@ namespace LibSM64
             var mc = GetComponent<MeshCollider>();
             var surfaces = Utils.GetSurfacesForMesh( transform.lossyScale, mc.sharedMesh, surfaceType, terrainType );
             _surfaceObjectId = Interop.SurfaceObjectCreate( _position, _rotation, surfaces.ToArray() );
+        }
+
+        void OnDisable()
+        {
+            if( Interop.isGlobalInit )
+            {
+                SM64Context.UnregisterSurfaceObject( this );
+                Interop.SurfaceObjectDelete( _surfaceObjectId );
+            }
         }
 
         internal void contextFixedUpdate()
@@ -69,13 +78,6 @@ namespace LibSM64
         public void SetRotation( Quaternion rotation )
         {
             _nextRotation = rotation;
-        }
-
-        void OnDisable()
-        {
-            SM64Context.UnregisterSurfaceObject( this );
-
-            Interop.SurfaceObjectDelete( _surfaceObjectId );
         }
     }
 }
