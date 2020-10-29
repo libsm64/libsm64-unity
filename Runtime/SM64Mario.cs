@@ -19,13 +19,14 @@ namespace LibSM64
         int buffIndex;
         Interop.SM64MarioState[] states;
 
+        GameObject marioRendererObject;
         Mesh marioMesh;
         uint marioId;
 
-        public Vector3 actualPosition { get; private set; }
-
-        void Start()
+        void OnEnable()
         {
+            Debug.Log("ONENABLE");
+
             SM64Context.RegisterMario( this );
 
             var initPos = transform.position;
@@ -34,9 +35,12 @@ namespace LibSM64
             inputProvider = GetComponent<SM64InputProvider>();
             if( inputProvider == null )
                 throw new System.Exception("Need to add an input provider component to Mario");
+
+            marioRendererObject = new GameObject("MARIO");
+            marioRendererObject.hideFlags |= HideFlags.HideInHierarchy;
             
-            var renderer = gameObject.AddComponent<MeshRenderer>();
-            var meshFilter = gameObject.AddComponent<MeshFilter>();
+            var renderer = marioRendererObject.AddComponent<MeshRenderer>();
+            var meshFilter = marioRendererObject.AddComponent<MeshFilter>();
 
             states = new Interop.SM64MarioState[2] {
                 new Interop.SM64MarioState(),
@@ -46,9 +50,8 @@ namespace LibSM64
             renderer.material = material;
             renderer.sharedMaterial.SetTexture("_MainTex", Interop.marioTexture);
 
-            transform.parent = null;
-            transform.localScale = new Vector3( -1, 1, 1 ) / Interop.SCALE_FACTOR;
-            transform.localPosition = Vector3.zero;
+            marioRendererObject.transform.localScale = new Vector3( -1, 1, 1 ) / Interop.SCALE_FACTOR;
+            marioRendererObject.transform.localPosition = Vector3.zero;
 
             lerpPositionBuffer = new Vector3[3 * Interop.SM64_GEO_MAX_TRIANGLES];
             lerpNormalBuffer = new Vector3[3 * Interop.SM64_GEO_MAX_TRIANGLES];
@@ -66,8 +69,19 @@ namespace LibSM64
 
         void OnDisable()
         {
-            SM64Context.UnregisterMario( this );
-            Interop.MarioDelete( marioId );
+            Debug.Log("ONDIS");
+
+            if( marioRendererObject != null )
+            {
+                Destroy( marioRendererObject );
+                marioRendererObject = null;
+            }
+
+            if( Interop.isGlobalInit )
+            {
+                SM64Context.UnregisterMario( this );
+                Interop.MarioDelete( marioId );
+            }
         }
 
         public void contextFixedUpdate()
@@ -109,7 +123,7 @@ namespace LibSM64
                 lerpNormalBuffer[i] = Vector3.LerpUnclamped( normalBuffers[buffIndex][i], normalBuffers[j][i], t );
             }
 
-            actualPosition = Vector3.LerpUnclamped( states[buffIndex].unityPosition, states[j].unityPosition, t );
+            transform.position = Vector3.LerpUnclamped( states[buffIndex].unityPosition, states[j].unityPosition, t );
 
             marioMesh.vertices = lerpPositionBuffer;
             marioMesh.normals = lerpNormalBuffer;

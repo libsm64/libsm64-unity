@@ -130,7 +130,8 @@ namespace LibSM64
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate void DebugPrintFuncDelegate(string str);
 
-        static public Texture2D marioTexture;
+        static public Texture2D marioTexture { get; private set; }
+        static public bool isGlobalInit { get; private set; }
 
         static void debugPrintCallback(string str)
         {
@@ -163,11 +164,15 @@ namespace LibSM64
 
             romHandle.Free();
             textureDataHandle.Free();
+
+            isGlobalInit = true;
         }
 
         public static void GlobalTerminate()
         {
             sm64_global_terminate();
+            marioTexture = null;
+            isGlobalInit = false;
         }
 
         public static void StaticSurfacesLoad( SM64Surface[] surfaces )

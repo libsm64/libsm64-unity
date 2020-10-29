@@ -46,6 +46,7 @@ namespace LibSM64
             if( s_instance == null )
             {
                 var contextGo = new GameObject( "SM64_CONTEXT" );
+                contextGo.hideFlags |= HideFlags.HideInHierarchy;
                 s_instance = contextGo.AddComponent<SM64Context>();
             }
         }

@@ -5,16 +5,9 @@ public class ExampleInputProvider : SM64InputProvider
 {
     [SerializeField] GameObject cameraObject = null;
 
-    SM64Mario _mario;
-
-    void Awake()
-    {
-        _mario = GetComponent<SM64Mario>();
-    }
-
     public override Vector3 GetCameraLookDirection()
     {
-        return _mario.actualPosition - cameraObject.transform.position;
+        return cameraObject.transform.forward;
     }
 
     public override Vector2 GetJoystickAxes()
