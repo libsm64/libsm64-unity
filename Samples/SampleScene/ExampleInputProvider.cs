@@ -3,7 +3,7 @@ using LibSM64;
 
 public class ExampleInputProvider : SM64InputProvider
 {
-    [SerializeField] GameObject cameraObject = null;
+    public GameObject cameraObject = null;
 
     public override Vector3 GetCameraLookDirection()
     {
